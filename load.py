@@ -1,24 +1,22 @@
-#!/usr/bin/env python
-"""Plugin to put your Carrier crew to work"""
-import platform
-import os
-import sys
-import tkinter as tk
-import requests
-import json
-
-
-import myNotebook as nb
-
-from typing import Optional, Tuple, Dict
-
-from config import config
-
 from EDMCLogging import get_main_logger
+from config import config
+from typing import Optional, Tuple, Dict
+import myNotebook as nb
+import json
+import requests
+import tkinter as tk
+import sys
+import os
+import platform
+/usr/bin/env python
+"""Plugin to put your Carrier crew to work"""
+
+
 logger = get_main_logger()
 
 
-TARGET_URL='http://localhost:5020'
+TARGET_URL = 'http://localhost:5020'
+
 
 class PluginConfig:
     """Holds globals for status and handling."""
