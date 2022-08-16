@@ -16,7 +16,7 @@ logger = get_main_logger()
 
 import myNotebook as nb
 
-TARGET_URL = 'http://localhost:5000'
+TARGET_URL = 'http://127.0.0.1:5000/journalevent/'
 
 
 class PluginConfig:

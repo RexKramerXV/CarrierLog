@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from loguru import logger
+import json
 import sys
 
 app = Flask(__name__)
@@ -17,7 +18,10 @@ def journalevent():
     global last_event
     if request.method == 'POST':
         posted_data = request.get_json()
-        event = posted_data['event']
+        logger.debug(f'{posted_data=}')
+        jsonstring = json.loads(posted_data)
+        logger.debug(f'{jsonstring=}')
+        event = jsonstring['event']
         nested_dict = {"Captain" : "Hook", "Bartender" : "Olivia"}
         r = jsonify(event=event, crew=nested_dict)
         logger.info(f'{r=}')
