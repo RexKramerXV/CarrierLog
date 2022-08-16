@@ -177,12 +177,12 @@ def plugin_start3(plugin_dir: str) -> str:
     plugin.concat_url()
 
     logger.debug(
-        f'Loaded values for Discord:\n',
-        f'{plugin.discord_guild=} ({type(plugin.discord_guild)})\n',
-        f'{plugin.discord_channel=} ({type(plugin.discord_channel)})\n',
-        f'{plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})\n',
-        f'{plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})\n',
-        f'{plugin.target_url} ({type(plugin.target_url)})'
+        f'Loaded values for Discord:\n \
+        {plugin.discord_guild=} ({type(plugin.discord_guild)})\n \
+        {plugin.discord_channel=} ({type(plugin.discord_channel)})\n \
+        {plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})\n \
+        {plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})\n \
+        {plugin.target_url} ({type(plugin.target_url)})'
     )
 
     return plugin_name
