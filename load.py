@@ -1,5 +1,6 @@
 """Plugin to put your Carrier crew to work"""
 
+import myNotebook as nb
 from typing import Optional, Tuple, Dict
 import json
 import requests
@@ -14,7 +15,6 @@ from EDMCLogging import get_main_logger
 from config import config
 logger = get_main_logger()
 
-import myNotebook as nb
 
 TARGET_URL = 'http://127.0.0.1:5000/journalevent/'
 
@@ -162,6 +162,17 @@ def plugin_start3(plugin_dir: str) -> str:
     plugin.bot_token_textvar.set(value=plugin.discord_bot_token)
     plugin.webhookurl_textvar.set(value=plugin.discord_webhookurl)
 
+    # tell REST server we're starting
+    post_dict = {
+        'event': 'Startup',
+        'reason': 'EDMC plugin started'
+    }
+    r = plugin.session.post(TARGET_URL, json=json.dumps(post_dict), timeout=5)
+    r.raise_for_status()
+
+    reply = r.json()
+    logger.debug(f'{reply=}')
+
     return plugin_name
 
 
@@ -174,6 +185,18 @@ def plugin_stop() -> None:
     logger.info(f'Stopping plugin')
     plugin.shutting_down = True
     set_status("No link to Carrier.", "grey")
+
+    # tell REST server we're leaving
+    post_dict = {
+        'event': 'Shutdown',
+        'reason': 'EDMC plugin stopped'
+    }
+    r = plugin.session.post(TARGET_URL, json=json.dumps(post_dict), timeout=5)
+    r.raise_for_status()
+
+    reply = r.json()
+    logger.debug(f'{reply=}')
+
     logger.debug('CarrierCommander plugin - stopped successfully.')
     return 0
 
@@ -321,7 +344,7 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     msg_num = reply['msgnum']
     msg = reply['msg']
 
-    logger.debug(f'{msgnum=}')
+    logger.debug(f'{msg_num=}')
     logger.debug(f'{msg=}')
 
 

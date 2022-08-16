@@ -16,14 +16,14 @@ def index():
 @app.route('/journalevent/', methods=['GET', 'POST'])
 def journalevent():
     global last_event
+    posted_json : str = "" # that will be a JSON string
     if request.method == 'POST':
-        posted_data = request.get_json()
-        logger.debug(f'{posted_data=}')
-        jsonstring = json.loads(posted_data)
-        logger.debug(f'{jsonstring=}')
-        event = jsonstring['event']
-        nested_dict = {"Captain" : "Hook", "Bartender" : "Olivia"}
-        r = jsonify(event=event, crew=nested_dict)
+        posted_json = request.get_json()
+        logger.debug(f'JSON received: {posted_json=}')
+        posted_dict = json.loads(posted_json)
+        logger.debug(f'dict loaded: {posted_dict=}')
+        event = posted_dict['event']
+        r = jsonify(event=event)
         logger.info(f'{r=}')
         last_event = r
         return r
