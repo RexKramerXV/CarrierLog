@@ -163,15 +163,15 @@ def plugin_start3(plugin_dir: str) -> str:
     plugin.bot_token_textvar.set(value=plugin.discord_bot_token)
 
     plugin.target_server = config.get_str(
-        'carriercommander_target_server', default='')
+        'carriercommander_target_server', default=plugin.target_server)
     plugin.target_server_textvar.set(value=plugin.target_server)
 
     plugin.target_port = config.get_str(
-        'carriercommander_target_port', default='')
+        'carriercommander_target_port', default=plugin.target_port)
     plugin.target_port_textvar.set(value=plugin.target_port)
 
     plugin.target_endpoint = config.get_str(
-        'carriercommander_target_endpoint', default='')
+        'carriercommander_target_endpoint', default=plugin.target_endpoint)
     plugin.target_endpoint_textvar.set(value=plugin.target_endpoint)
 
     plugin.concat_url()
