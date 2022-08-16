@@ -1,6 +1,5 @@
 """Plugin to put your Carrier crew to work"""
 
-import myNotebook as nb
 from typing import Optional, Tuple, Dict
 import json
 import requests
@@ -15,6 +14,7 @@ from EDMCLogging import get_main_logger
 from config import config
 logger = get_main_logger()
 
+import myNotebook as nb
 
 TARGET_URL = 'http://127.0.0.1:5000/journalevent/'
 
@@ -32,25 +32,38 @@ class PluginConfig:
         self.session: requests.Session = requests.Session()
 
         #
-        # Discord related properties
+        # Consumer related properties
+        #
+        self.target_server: str = 'http://127.0.0.1'
+        self.target_server_textvar = tk.StringVar()
+
+        self.target_port: str = '5000'
+        self.target_port_textvar = tk.StringVar()
+
+        self.target_endpoint: str = 'journalevent'
+        self.target_endpoint_textvar = tk.StringVar()
+
+        self.target_url: str = self.concat_url()
+
+        # Discord related properties with their config values
         #
 
         self.discord_guild: str = ''         # Discord Guild name
-        self.discord_channel_name: str = ''  # Discord Channel name
-        self.discord_webhookurl: str = ''    # Discord Webhook URL
-        self.discord_bot_token: str = ''     # Discord bot token
-        self.discord_prefix: str = '/'       # Discord bot prefix
-        self.discord_description: str = 'Carrier Commander Discord Bot'  # name of bot
-
-        #
-        # config related properties
-        #
-
         self.guild_textvar = tk.StringVar()
+
+        self.discord_channel_name: str = ''  # Discord Channel name
         self.channel_textvar = tk.StringVar()
+
+        self.discord_webhookurl: str = ''    # Discord Webhook URL
         self.webhookurl_textvar = tk.StringVar()
+
+        self.discord_bot_token: str = ''     # Discord bot token
         self.bot_token_textvar = tk.StringVar()
+
+        self.discord_prefix: str = '/'       # Discord bot prefix
         self.discord_prefix_textvar = tk.StringVar()
+
+        self.discord_description: str = 'Carrier Commander Discord Bot'  # name of bot
 
         # the message about Carrier Status in EDMC
         self.carrier_status_msg = Optional[tk.Label]
@@ -60,10 +73,11 @@ class PluginConfig:
         #
 
         self.queue: Queue = Queue()
-        self.loop: asyncio.AbstractEventLoop = None
-        self.discord_thread: Thread = None
 
         logger.debug("PluginConfig initialized.")
+
+    def concat_url(self):
+        self.target_url = f'{self.target_server}/{self.target_port}/{self.target_endpoint}/'
 
 
 plugin = PluginConfig()
@@ -131,24 +145,21 @@ def plugin_start3(plugin_dir: str) -> str:
     """
 
     plugin_name = os.path.basename(os.path.dirname(__file__))
-    logger.info(f'CarrierCommander folder is {plugin_dir}')
-    logger.info(f'CarrierCommander plugin name is {plugin_name}')
+    logger.info(
+        f'Starting CarrierCommander plugin: name is {plugin_name} in folder {plugin_dir}')
 
-    # read the presets from config (if available)
+    # read the presets from config (if available) and set the text variables
     plugin.discord_guild = config.get_str(
         'carriercommander_discord_guild', default='')
-    logger.debug(
-        f'Loaded value: {plugin.discord_guild=} ({type(plugin.discord_guild)})')
+    plugin.guild_textvar.set(value=plugin.discord_guild)
 
     plugin.discord_channel = config.get_str(
         'carriercommander_discord_channel', default='')
-    logger.debug(
-        f'Loaded value: {plugin.discord_channel=} ({type(plugin.discord_channel)})')
+    plugin.channel_textvar.set(value=plugin.discord_channel)
 
     plugin.discord_webhookurl = config.get_str(
         'carriercommander_discord_webhookurl', default='')
-    logger.debug(
-        f'Loaded value: {plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})')
+    plugin.webhookurl_textvar.set(value=plugin.discord_webhookurl)
 
     plugin.discord_bot_token = config.get_str(
         'carriercommander_discord_bot_token', default='')
@@ -161,17 +172,6 @@ def plugin_start3(plugin_dir: str) -> str:
     plugin.channel_textvar.set(value=plugin.discord_channel)
     plugin.bot_token_textvar.set(value=plugin.discord_bot_token)
     plugin.webhookurl_textvar.set(value=plugin.discord_webhookurl)
-
-    # tell REST server we're starting
-    post_dict = {
-        'event': 'Startup',
-        'reason': 'EDMC plugin started'
-    }
-    r = plugin.session.post(TARGET_URL, json=json.dumps(post_dict), timeout=5)
-    r.raise_for_status()
-
-    reply = r.json()
-    logger.debug(f'{reply=}')
 
     return plugin_name
 
@@ -285,6 +285,30 @@ def plugin_prefs(parent: nb.Notebook, cmdr: str, is_beta: bool) -> Optional[tk.F
     nb.Entry(conf_frame, textvariable=plugin.bot_token_textvar).grid(
         sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=PADY)
 
+    cur_row += 2
+
+    # Label for consumong server
+    nb.Label(conf_frame, text=_('Server')).grid(
+        sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
+    nb.Entry(conf_frame, textvariable=plugin.target_server_textvar).grid(
+        sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=PADY)
+
+    cur_row += 2
+
+    # Label for Discord Bot Token
+    nb.Label(conf_frame, text=_('Port')).grid(
+        sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
+    nb.Entry(conf_frame, textvariable=plugin.target_port_textvar).grid(
+        sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=PADY)
+
+    cur_row += 2
+
+    # Label for Discord Bot Token
+    nb.Label(conf_frame, text=_('Endpoint')).grid(
+        sticky=tk.W, row=cur_row, column=0, padx=PADX, pady=PADY)
+    nb.Entry(conf_frame, textvariable=plugin.target_endpoint_textvar).grid(
+        sticky=tk.EW, row=cur_row, column=1, padx=PADX, pady=PADY)
+
     return conf_frame
 
 
@@ -337,14 +361,13 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     #
     # POST only certain requests to webserver
     #
-    r = plugin.session.post(TARGET_URL, json=json.dumps(entry), timeout=5)
+    r = plugin.session.post(plugin.target_url, json=json.dumps(entry), timeout=5)
     r.raise_for_status()
 
     reply = r.json()
-    msg_num = reply['msgnum']
     msg = reply['msg']
 
-    logger.debug(f'{msg_num=}')
+    logger.debug(f'{msgnum=}')
     logger.debug(f'{msg=}')
 
 
