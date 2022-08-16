@@ -1,21 +1,22 @@
-from EDMCLogging import get_main_logger
-from config import config
+"""Plugin to put your Carrier crew to work"""
+
 from typing import Optional, Tuple, Dict
-import myNotebook as nb
 import json
 import requests
 import tkinter as tk
+from queue import Queue
 import sys
 import os
 import platform
-/usr/bin/env python
-"""Plugin to put your Carrier crew to work"""
 
 
+from EDMCLogging import get_main_logger
+from config import config
 logger = get_main_logger()
 
+import myNotebook as nb
 
-TARGET_URL = 'http://localhost:5020'
+TARGET_URL = 'http://localhost:5000'
 
 
 class PluginConfig:
