@@ -18,7 +18,8 @@ def journalevent():
     if request.method == 'POST':
         posted_data = request.get_json()
         event = posted_data['event']
-        r = jsonify(event=event)
+        nested_dict = {"Captain" : "Hook", "Bartender" : "Olivia"}
+        r = jsonify(event=event, crew=nested_dict)
         logger.info(f'{r=}')
         last_event = r
         return r
@@ -35,6 +36,6 @@ if __name__ == "__main__":
         # serve(app, host="0.0.0.0", port=5020)
         app.run(debug=True)
     except KeyboardInterrupt:
-        print('Caught Ctrl-C')
+        print('Caught Ctrl+C')
     finally:
         sys.exit(0)
