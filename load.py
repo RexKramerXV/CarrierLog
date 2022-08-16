@@ -31,7 +31,7 @@ class PluginConfig:
         #
         # Consumer related properties
         #
-        self.target_server: str = 'http://127.0.0.1'
+        self.target_server: str = '127.0.0.1'
         self.target_server_textvar = tk.StringVar()
 
         self.target_port: str = '5000'
@@ -74,7 +74,7 @@ class PluginConfig:
         logger.debug("PluginConfig initialized.")
 
     def concat_url(self):
-        self.target_url = f'{self.target_server}/{self.target_port}/{self.target_endpoint}/'
+        self.target_url = f'http://{self.target_server}/{self.target_port}/{self.target_endpoint}/'
 
 
 plugin = PluginConfig()
@@ -174,15 +174,15 @@ def plugin_start3(plugin_dir: str) -> str:
         'carriercommander_target_endpoint', default=plugin.target_endpoint)
     plugin.target_endpoint_textvar.set(value=plugin.target_endpoint)
 
-    plugin.concat_url()
+    plugin.concat_url() # create the full API call uri
 
     logger.debug(
-        f'Loaded values for Discord:\n \
+        f'Loaded config properties:\n \
         {plugin.discord_guild=} ({type(plugin.discord_guild)})\n \
         {plugin.discord_channel=} ({type(plugin.discord_channel)})\n \
         {plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})\n \
         {plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})\n \
-        {plugin.target_url} ({type(plugin.target_url)})'
+        {plugin.target_url=} ({type(plugin.target_url)})'
     )
 
     return plugin_name
@@ -333,25 +333,33 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     plugin.discord_channel = plugin.channel_textvar.get()
     plugin.discord_bot_token = plugin.bot_token_textvar.get()
     plugin.discord_webhookurl = plugin.webhookurl_textvar.get()
+ 
+    plugin.target_server = plugin.target_server_textvar.get()
+    plugin.target_port = plugin.target_port_textvar.get()
+    plugin.target_endpoint = plugin.target_endpoint_textvar.get()
+
 
     # Store new value in config
     config.set('carriercommander_discord_guild', plugin.discord_guild)
-    logger.trace(
-        f'Stored value: {plugin.discord_guild=} ({type(plugin.discord_guild)})')
-
     config.set('carriercommander_discord_channel', plugin.discord_channel)
-    logger.trace(
-        f'Stored value: {plugin.discord_channel=} ({type(plugin.discord_channel)})')
-
-    config.set('carriercommander_discord_webhookurl',
-               plugin.discord_webhookurl)
-    logger.trace(
-        f'Stored value: {plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})')
-
+    config.set('carriercommander_discord_webhookurl', plugin.discord_webhookurl)
     config.set('carriercommander_discord_bot_token', plugin.discord_bot_token)
-    logger.trace(
-        f'Stored value: {plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})')
 
+    config.set('carriercommander_target_server', plugin.target_server)
+    config.set('carriercommander_target_port', plugin.target_port)
+    config.set('carriercommander_target_endpoint', plugin.target_endpoint)
+    
+    
+    logger.debug(
+        f'Stored config properties:\n \
+        {plugin.discord_guild=} ({type(plugin.discord_guild)})\n \
+        {plugin.discord_channel=} ({type(plugin.discord_channel)})\n \
+        {plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})\n \
+        {plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})\n \
+        {plugin.target_server=} ({type(plugin.target_server)})\n \
+        {plugin.target_port=} ({type(plugin.target_port)})\n \
+        {plugin.target_endpoint=} ({type(plugin.target_endpoint)}) \
+        ')
 
 def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry: dict, state: dict) -> None:
     """
