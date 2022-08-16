@@ -203,7 +203,7 @@ def plugin_stop() -> None:
         'event': 'Shutdown',
         'reason': 'EDMC plugin stopped'
     }
-    r = plugin.session.post(TARGET_URL, json=json.dumps(post_dict), timeout=5)
+    r = plugin.session.post(plugin.target_url, json=json.dumps(post_dict), timeout=5)
     r.raise_for_status()
 
     reply = r.json()
