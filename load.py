@@ -1,5 +1,6 @@
 """Plugin to put your Carrier crew to work"""
 
+import myNotebook as nb
 from typing import Optional, Tuple, Dict
 import json
 import requests
@@ -13,10 +14,6 @@ import platform
 from EDMCLogging import get_main_logger
 from config import config
 logger = get_main_logger()
-
-import myNotebook as nb
-
-TARGET_URL = 'http://127.0.0.1:5000/journalevent/'
 
 
 class PluginConfig:
@@ -163,15 +160,30 @@ def plugin_start3(plugin_dir: str) -> str:
 
     plugin.discord_bot_token = config.get_str(
         'carriercommander_discord_bot_token', default='')
-    logger.debug(
-        f'Loaded value: {plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})')
-
-    # set the text variables correspondingly
-
-    plugin.guild_textvar.set(value=plugin.discord_guild)
-    plugin.channel_textvar.set(value=plugin.discord_channel)
     plugin.bot_token_textvar.set(value=plugin.discord_bot_token)
-    plugin.webhookurl_textvar.set(value=plugin.discord_webhookurl)
+
+    plugin.target_server = config.get_str(
+        'carriercommander_target_server', default='')
+    plugin.target_server_textvar.set(value=plugin.target_server)
+
+    plugin.target_port = config.get_str(
+        'carriercommander_target_port', default='')
+    plugin.target_port_textvar.set(value=plugin.target_port)
+
+    plugin.target_endpoint = config.get_str(
+        'carriercommander_target_endpoint', default='')
+    plugin.target_endpoint_textvar.set(value=plugin.target_endpoint)
+
+    plugin.concat_url()
+
+    logger.debug(
+        f'Loaded values for Discord:\n',
+        f'{plugin.discord_guild=} ({type(plugin.discord_guild)})\n',
+        f'{plugin.discord_channel=} ({type(plugin.discord_channel)})\n',
+        f'{plugin.discord_webhookurl=} ({type(plugin.discord_webhookurl)})\n',
+        f'{plugin.discord_bot_token=} ({type(plugin.discord_bot_token)})\n',
+        f'{plugin.target_url} ({type(plugin.target_url)})'
+    )
 
     return plugin_name
 
@@ -361,7 +373,8 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
     #
     # POST only certain requests to webserver
     #
-    r = plugin.session.post(plugin.target_url, json=json.dumps(entry), timeout=5)
+    r = plugin.session.post(
+        plugin.target_url, json=json.dumps(entry), timeout=5)
     r.raise_for_status()
 
     reply = r.json()
