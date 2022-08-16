@@ -74,7 +74,7 @@ class PluginConfig:
         logger.debug("PluginConfig initialized.")
 
     def concat_url(self):
-        self.target_url = f'http://{self.target_server}/{self.target_port}/{self.target_endpoint}/'
+        self.target_url = f'http://{self.target_server}:{self.target_port}/{self.target_endpoint}/'
 
 
 plugin = PluginConfig()
@@ -349,7 +349,8 @@ def prefs_changed(cmdr: str, is_beta: bool) -> None:
     config.set('carriercommander_target_port', plugin.target_port)
     config.set('carriercommander_target_endpoint', plugin.target_endpoint)
     
-    
+    plugin.concat_url()
+
     logger.debug(
         f'Stored config properties:\n \
         {plugin.discord_guild=} ({type(plugin.discord_guild)})\n \
@@ -387,8 +388,6 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
 
     reply = r.json()
     msg = reply['msg']
-
-    logger.debug(f'{msgnum=}')
     logger.debug(f'{msg=}')
 
 
