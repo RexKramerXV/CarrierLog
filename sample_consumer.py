@@ -1,24 +1,21 @@
 from flask import Flask, jsonify, request
 from werkzeug import exceptions
 from loguru import logger
-import json
 import sys
 
 app = Flask(__name__)
 
 last_event: dict = None
 
-@app.route('/event/', methods=['GET', 'POST'])
+@app.route('/journalevent/', methods=['GET', 'POST'])
 def journalevent():
     global last_event
     if request.method == 'POST':
-        posted_data = request.get_json()
-        logger.debug(f'{posted_data=}')
-        jsonstring = json.loads(posted_data)
-        logger.debug(f'{jsonstring=}')
-        event = jsonstring['event']
+        posted_data = request.get_json() # returns a dict
+        logger.debug(f'{posted_data=} ({type(posted_data)})')
+        event = posted_data['event']
         r = jsonify(event=event)
-        logger.info(f'{r=}')
+        logger.debug(f'{r=}')
         last_event = r
         return r, 200
 
