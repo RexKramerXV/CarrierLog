@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from werkzeug import exceptions
 from loguru import logger
-import json
+#import json
 import sys
 
 app = Flask(__name__)
@@ -12,9 +12,9 @@ last_event: dict = None
 def journalevent():
     global last_event
     if request.method == 'POST':
-        posted_data = request.get_json() # returns a dict
+        posted_data: dict = request.get_json() # returns a dict
         logger.debug(f'{posted_data=} ({type(posted_data)})')
-        posted_data = json.loads(posted_data)
+        #posted_data = json.loads(posted_data)
         event = posted_data['event']
         r = jsonify(event=event)
         logger.debug(f'{r=}')
