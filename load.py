@@ -3,7 +3,7 @@
 import myNotebook as nb
 from typing import Optional, Tuple, Dict
 import json
-import requests
+import timeout_session
 import tkinter as tk
 from queue import Queue
 import sys
@@ -25,8 +25,7 @@ class PluginConfig:
         #
         # REST API related settings
         #
-
-        self.session: requests.Session = requests.Session()
+        self.session = timeout_session.new_session()
 
         #
         # Consumer related properties
@@ -386,9 +385,8 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
         plugin.target_url, json=json.dumps(entry), timeout=5)
     r.raise_for_status()
 
-    reply = r.json()
-    msg = reply['msg']
-    logger.debug(f'{msg=}')
+    response = r.json()
+    logger.debug(f'{response=}')
 
 
 def set_status(r: str, color: str) -> None:
